@@ -13,6 +13,8 @@
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <import resource="spring-dao.xml"/>
+    <import resource="spring-redis.xml"/>
+
     <context:component-scan base-package="com.chao"/>
 
     <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
@@ -46,6 +48,9 @@
     <!--创建securityManager对象-->
     <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
         <property name="realm" ref="realm"/>
+        <property name="sessionManager" ref="sssionManager"/>
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="rememberMeManager" ref="cookieRememberMeManager"/>
     </bean>
 
     <bean id="realm" class="com.chao.shiro.realm.CustomRealm">
@@ -55,6 +60,22 @@
     <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
         <property name="hashAlgorithmName" value="MD5"/>
         <property name="hashIterations" value="1"/>
+    </bean>
+
+    <bean id="sssionManager" class="com.chao.session.CustomSessionManager">
+        <property name="sessionDAO" ref="redisSessionDao"/>
+    </bean>
+
+    <bean id="redisSessionDao" class="com.chao.session.RedisSessionDao"/>
+
+    <bean id="cacheManager" class="com.chao.cache.RedisCacheManager"/>
+
+    <bean id="cookieRememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        <property name="cookie" ref="simpleCookie"/>
+    </bean>
+    <bean id="simpleCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg value="rememberMe"/>
+        <property name="maxAge" value="200000"/>
     </bean>
 
 </beans>
